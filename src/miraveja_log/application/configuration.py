@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from miraveja_log.domain import LogLevel, OutputTarget
 
@@ -29,13 +29,20 @@ class LoggerConfig(BaseModel):
         default=None, description="The filename for the log file if output_target is FILE or JSON."
     )
 
-    @field_validator("directory", "filename", mode="before")
-    def validate_file_settings(cls, v: Optional[str], info) -> Optional[Path]:
-        """Validate that directory and filename are provided when output_target is FILE or JSON."""
-        output_target = info.data.get("output_target")
-        if output_target in {OutputTarget.FILE, OutputTarget.JSON} and v is None:
-            raise ValueError(f"{info.field_name} must be provided when output_target is {output_target}.")
+    @field_validator("directory", mode="before")
+    def validate_directory(cls, v: Optional[str]) -> Optional[Path]:
+        """Convert directory string to Path if provided."""
         return Path(v) if v is not None else None
+
+    @model_validator(mode="after")
+    def validate_file_target_requirements(self) -> "LoggerConfig":
+        """Validate that directory and filename are provided when output_target is FILE or JSON."""
+        if self.output_target in {OutputTarget.FILE, OutputTarget.JSON}:
+            if self.directory is None:
+                raise ValueError(f"directory must be provided when output_target is {self.output_target}.")
+            if self.filename is None:
+                raise ValueError(f"filename must be provided when output_target is {self.output_target}.")
+        return self
 
     @classmethod
     def from_env(cls) -> "LoggerConfig":
