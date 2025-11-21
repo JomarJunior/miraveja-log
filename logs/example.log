@@ -1,0 +1,2 @@
+2025-11-21 00:22:34 [INFO] file_logger: This will be written to ./logs/example.log
+2025-11-21 00:22:34 [DEBUG] file_logger: Debug information in file

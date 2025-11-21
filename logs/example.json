@@ -1,0 +1,1 @@
+{"timestamp": "2025-11-21T00:22:34.623498", "level": "INFO", "name": "json_logger", "message": "User action", "user_id": 12345, "username": "john_doe", "action": "login", "ip_address": "192.168.1.1"}
