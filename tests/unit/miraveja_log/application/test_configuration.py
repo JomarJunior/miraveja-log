@@ -268,10 +268,11 @@ class TestLoggerConfigEdgeCases:
         assert config.directory == Path("./logs")
 
     def test_logger_config_with_windows_path(self) -> None:
-        """Test LoggerConfig with Windows-style path."""
-        config = LoggerConfig(name="test", output_target=OutputTarget.FILE, directory="C:\\logs", filename="app.log")
-        assert config.directory == Path("C:\\logs")
-        assert config.get_full_path() == Path("C:\\logs\\app.log")
+        """Test LoggerConfig with Windows-style path (platform-agnostic)."""
+        # Use forward slashes which work on both Windows and Unix
+        config = LoggerConfig(name="test", output_target=OutputTarget.FILE, directory="C:/logs", filename="app.log")
+        assert config.directory == Path("C:/logs")
+        assert config.get_full_path() == Path("C:/logs/app.log")
 
     def test_logger_config_model_dump(self) -> None:
         """Test that LoggerConfig can be dumped to dictionary."""
