@@ -25,12 +25,40 @@ class JSONFormatter(logging.Formatter):
             "message": record.getMessage(),
         }
 
-        # Merge extra fields at top level (flat structure)
-        if hasattr(record, "extra") and isinstance(record.extra, dict):  # type: ignore
-            log_data.update(record.extra)  # type: ignore
+        # Extract extra fields from LogRecord attributes
+        # Python logging adds extra fields as attributes on the record
+        reserved_attrs = {
+            "name",
+            "msg",
+            "args",
+            "created",
+            "filename",
+            "funcName",
+            "levelname",
+            "levelno",
+            "lineno",
+            "module",
+            "msecs",
+            "message",
+            "pathname",
+            "process",
+            "processName",
+            "relativeCreated",
+            "thread",
+            "threadName",
+            "exc_info",
+            "exc_text",
+            "stack_info",
+            "getMessage",
+            "taskName",
+        }
+
+        for key, value in record.__dict__.items():
+            if key not in reserved_attrs and not key.startswith("_"):
+                log_data[key] = value
 
         # Handle exception information
         if record.exc_info:
-            log_data["exc_info"] = self.formatException(record.exc_info)
+            log_data["exception"] = self.formatException(record.exc_info)
 
         return json.dumps(log_data)

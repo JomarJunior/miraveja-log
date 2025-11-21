@@ -13,7 +13,7 @@ class LoggerConfig(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     name: str = Field(..., description="The name of the logger.")
-    level: LogLevel = Field(default=LogLevel.INFO, description="The logging level.")
+    level: LogLevel = Field(default=LogLevel.DEBUG, description="The logging level.")
     output_target: OutputTarget = Field(default=OutputTarget.CONSOLE, description="The output target for the logger.")
     log_format: Optional[str] = Field(
         default="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -58,7 +58,11 @@ class LoggerConfig(BaseModel):
         - LOGGER_DIR: Log directory
         - LOGGER_FILENAME: Log filename
         """
-        name = os.getenv("LOGGER_NAME", "default_logger")
+        name = os.getenv("LOGGER_NAME", "default_name")
+        # Treat empty strings as not set
+        if not name:
+            name = "default_name"
+
         config = cls(
             name=name,
         )
@@ -81,13 +85,15 @@ class LoggerConfig(BaseModel):
 
         dir_str = os.getenv("LOGGER_DIR")
         if dir_str:
-            config.directory = Path(dir_str)
+            # Convert relative paths to absolute
+            config.directory = Path(dir_str).resolve()
 
         filename_str = os.getenv("LOGGER_FILENAME")
         if filename_str:
             config.filename = filename_str
 
-        return config
+        # Reconstruct the model to ensure all validations are applied
+        return cls(**config.model_dump())
 
     def get_full_path(self) -> Optional[Path]:
         """Get the full path to the log file if applicable."""

@@ -148,7 +148,9 @@ class TestJSONFormatterExtraFields:
             args=(),
             exc_info=None,
         )
-        record.extra = {"user_id": "123", "request_id": "abc"}  # type: ignore
+        # Add extra fields as record attributes (how logging.extra actually works)
+        record.user_id = "123"  # type: ignore
+        record.request_id = "abc"  # type: ignore
 
         result = formatter.format(record)
         json_data = json.loads(result)
@@ -207,9 +209,9 @@ class TestJSONFormatterExceptionHandling:
             result = formatter.format(record)
             json_data = json.loads(result)
 
-            assert "exc_info" in json_data
-            assert "ValueError" in json_data["exc_info"]
-            assert "Test exception" in json_data["exc_info"]
+            assert "exception" in json_data
+            assert "ValueError" in json_data["exception"]
+            assert "Test exception" in json_data["exception"]
 
     def test_format_without_exception_info(self) -> None:
         """Test that format works without exception info."""

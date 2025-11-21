@@ -10,10 +10,20 @@ from miraveja_log.infrastructure.formatters.text_formatter import TextFormatter
 class PythonLoggerAdapter(ILogger):
     """Adapter wrapping Python's logging.Logger for synchronous operations."""
 
+    @staticmethod
+    def _create_file_handler(config: LoggerConfig, default_name: str) -> logging.FileHandler:
+        """Create a FileHandler and ensure directory exists."""
+        file_path = config.get_full_path()
+        if file_path:
+            # Create directory if it doesn't exist
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            return logging.FileHandler(str(file_path))
+        return logging.FileHandler(default_name)
+
     HANDLER_TARGET_MAPPER: Dict[OutputTarget, Callable[[LoggerConfig], logging.Handler]] = {
         OutputTarget.CONSOLE: lambda config: logging.StreamHandler(),
-        OutputTarget.FILE: lambda config: logging.FileHandler(config.get_full_path() or "app.log"),
-        OutputTarget.JSON: lambda config: logging.FileHandler(config.get_full_path() or "app.json"),
+        OutputTarget.FILE: lambda config: PythonLoggerAdapter._create_file_handler(config, "app.log"),
+        OutputTarget.JSON: lambda config: PythonLoggerAdapter._create_file_handler(config, "app.json"),
     }
 
     FORMATTER_TARGET_MAPPER: Dict[OutputTarget, Callable[[LoggerConfig], logging.Formatter]] = {
@@ -62,6 +72,7 @@ class PythonLoggerAdapter(ILogger):
         logger: logging.Logger = logging.getLogger(self._config.name)
         logger.setLevel(self._config.level.value)
         logger.handlers.clear()  # Clear existing handlers
+        logger.propagate = False  # Prevent propagation to root logger
 
         handler: logging.Handler = self._select_handler_based_on_target()
         formatter: logging.Formatter = self._select_formatter_based_on_target()

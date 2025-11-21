@@ -20,9 +20,9 @@ class TestLoggerConfigBasics:
             LoggerConfig()  # type: ignore
 
     def test_logger_config_defaults_to_info_level(self) -> None:
-        """Test that LoggerConfig defaults to INFO level."""
+        """Test that LoggerConfig defaults to DEBUG level."""
         config = LoggerConfig(name="test")
-        assert config.level == LogLevel.INFO
+        assert config.level == LogLevel.DEBUG
 
     def test_logger_config_defaults_to_console_target(self) -> None:
         """Test that LoggerConfig defaults to CONSOLE output target."""
@@ -114,7 +114,7 @@ class TestLoggerConfigFromEnv:
         """Test that from_env uses default name when LOGGER_NAME is not set."""
         with patch.dict(os.environ, {}, clear=True):
             config = LoggerConfig.from_env()
-            assert config.name == "default_logger"
+            assert config.name == "default_name"
 
     def test_from_env_loads_name_from_environment(self) -> None:
         """Test that from_env loads logger name from LOGGER_NAME."""
@@ -149,10 +149,12 @@ class TestLoggerConfigFromEnv:
             assert config.date_format == custom_datefmt
 
     def test_from_env_loads_directory_from_environment(self) -> None:
-        """Test that from_env loads directory from LOGGER_DIR."""
+        """Test that from_env loads directory from LOGGER_DIR and resolves to absolute path."""
         with patch.dict(os.environ, {"LOGGER_NAME": "test", "LOGGER_DIR": "./logs"}, clear=True):
             config = LoggerConfig.from_env()
-            assert config.directory == Path("./logs")
+            # Should be resolved to absolute path
+            assert config.directory.is_absolute()
+            assert config.directory.name == "logs"
 
     def test_from_env_loads_filename_from_environment(self) -> None:
         """Test that from_env loads filename from LOGGER_FILENAME."""
@@ -165,7 +167,7 @@ class TestLoggerConfigFromEnv:
         with patch.dict(os.environ, {"LOGGER_NAME": "test"}, clear=True):
             config = LoggerConfig.from_env()
             assert config.name == "test"
-            assert config.level == LogLevel.INFO
+            assert config.level == LogLevel.DEBUG
             assert config.output_target == OutputTarget.CONSOLE
             assert config.log_format == "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             assert config.date_format == "%Y-%m-%d %H:%M:%S"
@@ -189,7 +191,9 @@ class TestLoggerConfigFromEnv:
             assert config.output_target == OutputTarget.FILE
             assert config.log_format == "%(message)s"
             assert config.date_format == "%Y-%m-%d"
-            assert config.directory == Path("./test_logs")
+            # Directory should be resolved to absolute path
+            assert config.directory.is_absolute()
+            assert config.directory.name == "test_logs"
             assert config.filename == "test.log"
 
 
