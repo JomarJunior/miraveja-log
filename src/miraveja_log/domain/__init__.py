@@ -1,23 +1,29 @@
 """
-miraveja-log domain layer.
+Domain layer - Core business logic and models.
 
-This module contains the core business logic and domain models for the logging library.
+This layer contains the fundamental business rules and models for logging.
+It has no dependencies on other layers.
 """
 
-from miraveja_log.domain.enums import LoggerLevel, LoggerTarget
-from miraveja_log.domain.exceptions import LoggerAlreadyExistsException, LoggerException
-from miraveja_log.domain.interfaces import ILogger
-from miraveja_log.domain.models import Logger
+from .enums import LogLevel, OutputTarget
+from .exceptions import ConfigurationException, HandlerException, LogException
+from .interfaces import IAsyncLogger, ILogger
+from .models import LogEntry
 
-__all__ = [
+# Rebuild Pydantic models to resolve forward references
+LogEntry.model_rebuild()
+
+__all__: list[str] = [
     # Enums
-    "LoggerLevel",
-    "LoggerTarget",
-    # Exceptions
-    "LoggerException",
-    "LoggerAlreadyExistsException",
+    "LogLevel",
+    "OutputTarget",
     # Interfaces
     "ILogger",
+    "IAsyncLogger",
     # Models
-    "Logger",
+    "LogEntry",
+    # Exceptions
+    "LogException",
+    "ConfigurationException",
+    "HandlerException",
 ]

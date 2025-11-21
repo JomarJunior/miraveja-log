@@ -1,8 +1,18 @@
 """
-miraveja-log infrastructure layer.
+Infrastructure layer - External integrations.
 
-This module contains infrastructure integrations and external adapters.
-Future integrations: FastAPI, Django, etc.
+This layer contains adapters for external systems and frameworks.
+Depends on Application and Domain layers.
 """
 
-__all__ = []
+from .adapters import AsyncPythonLoggerAdapter, PythonLoggerAdapter
+from .formatters import JSONFormatter, TextFormatter
+
+__all__: list[str] = [
+    # Adapters
+    "PythonLoggerAdapter",
+    "AsyncPythonLoggerAdapter",
+    # Formatters
+    "TextFormatter",
+    "JSONFormatter",
+]

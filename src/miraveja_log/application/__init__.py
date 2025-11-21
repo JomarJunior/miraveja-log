@@ -1,13 +1,14 @@
 """
-miraveja-log application layer.
+Application layer - Use cases and orchestration.
 
-This module contains the use cases and application logic for the logging library.
+This layer contains the business logic for logger creation and configuration.
+Depends only on the Domain layer.
 """
 
-from miraveja_log.application.configuration import LoggerConfig
-from miraveja_log.application.logger_factory import LoggerFactory
+from .configuration import LoggerConfig
+from .logger_factory import LoggerFactory
 
 __all__ = [
-    "LoggerConfig",
     "LoggerFactory",
+    "LoggerConfig",
 ]
